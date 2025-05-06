@@ -5,12 +5,9 @@ on:
     branches:
       - main
 
-permissions:
-  contents: write
-
 jobs:
   build:
-    name: Build binaries for multiple OS/Architectures
+    name: Build binaries
     runs-on: ubuntu-latest
 
     strategy:
@@ -62,23 +59,3 @@ jobs:
           name: AntiDcGenAI-${{ matrix.goos }}-${{ matrix.goarch }}
           path: build/
 
-  # release:
-  #   name: Create GitHub Release
-  #   needs: build
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - name: Download all build artifacts
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         path: build/
-  #         merge-multiple: true
-
-  #     - name: Create GitHub Release
-  #       uses: softprops/action-gh-release@v2
-  #       with:
-  #         tag_name: main-$(date +'%Y%m%d%H%M%S')
-  #         name: "Build from main - $(date +'%Y-%m-%d %H:%M:%S')"
-  #         files: build/**
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
