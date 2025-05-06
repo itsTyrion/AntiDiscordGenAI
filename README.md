@@ -25,7 +25,7 @@ Host it yourself. It's easy to do, runs on pretty much anything with an internet
 ---
 
 ## Setup
-Run the bot from the directory you want the config in.
+Run the bot from the directory you want the config in (or set `CONFIG_PATH` to change the location)
 After the first start, the config (`config.json`) will be generated.  
 Fill in the bot token and just run it again.
 
@@ -35,7 +35,7 @@ Fill in the bot token and just run it again.
 2. Just run it. On a server, use `screen` to keep it running after disconnecting
 
 #### With Podman:
-1. git glone the repo.
+1. git glone the repo (or download as zip and unzip it)
 2. 
 ```
 podman build -t anti-dc-genai:latest .
@@ -47,7 +47,7 @@ podman run -d \
   anti-dc-genai:latest
 ```
 #### With Docker:
-1. git clone the repository
+1. git clone the repository (or download as zip and unzip it)
 2. 
 ```
 podman build -t anti-dc-genai:latest .
@@ -61,14 +61,15 @@ docker run -d \
 
 ## Config
 
-Replace `"YOUR_TOKEN_HERE"` with your actual Discord bot token.
-Change `delete`/`warn`/`kick`/`ban` to your liking (`true`/`false`)
+Replace `"YOUR_TOKEN_HERE"` with your actual Discord bot token.  
+Change `delete`/`warn`/`kick`/`ban` to your liking (`true`/`false`).  
+If you come across more of those bots/apps, add their user ID to the list and the bot will handle them with a warn (+deletion if configured) as well, but no kick/ban.
 
 ---
 
 ## Notes
 
-- The bot reads its configuration from `/app/config.json` inside the container.  
+- The bot reads its configuration from `/app/config.json` inside the container, and $CONFIG_PATH/config.json (./config.json if unset) outside of it.
 - Make sure your `config.json` is in the same directory as the Docker commands or adjust paths accordingly.  
 - To stop the container:
 

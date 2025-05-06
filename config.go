@@ -17,7 +17,7 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	cfgPath := os.Getenv("cfgPath")
+	cfgPath := os.Getenv("CONFIG_PATH")
 	if cfgPath == "" {
 		cfgPath = "."
 	}
