@@ -1,0 +1,84 @@
+name: Build and Release Go Project
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build binaries for multiple OS/Architectures
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [386, amd64, armv6, armv7, arm64]
+        exclude:
+          - goos: darwin
+            goarch: 386
+          - goos: darwin
+            goarch: armv6
+          - goos: darwin
+            goarch: armv7
+          - goos: windows
+            goarch: armv6
+          - goos: windows
+            goarch: armv7
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.2'
+
+      - name: Build
+        run: |
+          mkdir -p build/
+          BIN_NAME="AntiDcGenAI"
+          OUTPUT="build/${BIN_NAME}_${{ matrix.goos }}_${{ matrix.goarch }}"
+
+          if [[ "${{ matrix.goarch }}" == "armv6" && "${{ matrix.goos }}" == "linux" ]]; then
+            GOARM=6 GOOS=linux GOARCH=arm go build -o "${OUTPUT}" ./...
+          elif [[ "${{ matrix.goarch }}" == "armv7" && "${{ matrix.goos }}" == "linux" ]]; then
+            GOARM=7 GOOS=linux GOARCH=arm go build -o "${OUTPUT}" ./...
+          else
+            if [[ "${{ matrix.goos }}" == "windows" ]]; then
+              OUTPUT="${OUTPUT}.exe"
+            fi
+            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o "${OUTPUT}" ./...
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: AntiDcGenAI-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: build/
+
+  # release:
+  #   name: Create GitHub Release
+  #   needs: build
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Download all build artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         path: build/
+  #         merge-multiple: true
+
+  #     - name: Create GitHub Release
+  #       uses: softprops/action-gh-release@v2
+  #       with:
+  #         tag_name: main-$(date +'%Y%m%d%H%M%S')
+  #         name: "Build from main - $(date +'%Y-%m-%d %H:%M:%S')"
+  #         files: build/**
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
