@@ -31,11 +31,11 @@ Fill in the bot token and just run it again.
 
 
 #### Directly (without a container):
-1. Download [the latest release](actions). If unsure, you probably want amd64 or arm64 for desktop/laptop/server and arm64/armv7/armv6 for e.g. a Raspberry Pi. (darwin = MacOS)
+1. Download [the latest release](https://github.com/itsTyrion/AntiDiscordGenAI/releases/latest). If unsure, you probably want amd64 or arm64 for desktop/laptop/server and arm64/armv7/armv6 for e.g. a Raspberry Pi. (darwin = MacOS)
 2. Just run it. On a server, use `screen` to keep it running after disconnecting
 
 #### With Podman:
-1. git glone the repo (or download as zip and unzip it)
+1. git clone the repo (or download as zip and unzip it)
 2. 
 ```
 podman build -t anti-dc-genai:latest .
@@ -50,7 +50,7 @@ podman run -d \
 1. git clone the repository (or download as zip and unzip it)
 2. 
 ```
-podman build -t anti-dc-genai:latest .
+docker build -t anti-dc-genai:latest .
 
 docker run -d \
   --name AntiDcGenAI \
