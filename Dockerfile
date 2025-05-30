@@ -1,4 +1,4 @@
-FROM golang:1.24.2-alpine AS builder
+FROM golang:1.24.3-alpine3.21 AS builder
 
 WORKDIR /app
 
@@ -20,7 +20,10 @@ WORKDIR /app
 
 COPY --from=builder /app/AntiDcGenAI .
 
-VOLUME ["/app/config.json"]
-ENV CONFIG_PATH=/app
+ENV CONFIG_PATH=/app/config
+
+# Use unprivileged user and ensure it has the necessary permissions
+RUN adduser -D bot && mkdir -p /app/config && chown -R bot:bot /app
+USER bot
 
 ENTRYPOINT ["./AntiDcGenAI"]

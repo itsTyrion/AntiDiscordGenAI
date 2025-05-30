@@ -22,9 +22,9 @@ func SetupLogging() *zap.SugaredLogger {
 		StacktraceKey: "stacktrace",
 		LineEnding:    zapcore.DefaultLineEnding,
 		EncodeTime:    zapcore.TimeEncoderOfLayout("15:04:05"), // Time format
-		EncodeLevel:   zapcore.CapitalColorLevelEncoder,        // Colored levels
+		EncodeLevel:   zapcore.LowercaseColorLevelEncoder,        // Colored levels
 		EncodeName:    ShortNameEncoder,                        // Short logger name
-		EncodeCaller:  zapcore.ShortCallerEncoder,              // Short caller
+		// EncodeCaller:  zapcore.ShortCallerEncoder,              // Short caller
 	}
 
 	core := zapcore.NewCore(
@@ -33,7 +33,7 @@ func SetupLogging() *zap.SugaredLogger {
 		zapcore.DebugLevel,                       // Log level
 	)
 
-	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(0))
 	defer logger.Sync()
 
 	return logger.Sugar()
