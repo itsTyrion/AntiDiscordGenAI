@@ -1,5 +1,4 @@
-Privacy Policy:
-This bot is designed to help server owners manage Discord's generative AI image feature.
+# Privacy Policy:
 
 ## Data Collection
 The bot processes messages solely to identify whether they were sent by a list of gen-AI bots. It does not read, store, or collect the content of any messages.

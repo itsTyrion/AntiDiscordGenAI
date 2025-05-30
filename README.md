@@ -9,8 +9,8 @@ Written in Go to become more familiar with it.
 
 Use the hosted bot, [**add here**](https://discord.com/oauth2/authorize?client_id=1366214068532285541&permissions=1374389544966&integration_type=0&scope=bot).
 You 
-This version always warns, and deletes/kicks/*bans* depending on the permissions and settings.  
-**Set with care.**
+This version has warn + kick + 1h timeout (but not ban) active by default.
+**Set with care after adding the bot**
 
 ## Option 2:
 Host it yourself. It's easy to do, runs on pretty much anything with an internet connection.
