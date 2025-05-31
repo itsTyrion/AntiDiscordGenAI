@@ -5,6 +5,11 @@ Discord recently added a feature to edit/"reimagine" images using generative AI 
 Therefore, I made this: A basic bot to automatically delete the messages and, optionally, warn/timeout/kick/ban people using them.  
 Written in Go to become more familiar with it.
 
+### Important!
+This bot is pointless if "Use External Apps" is not allowed.  
+The permission only controls whether an external app can *respond visible to everyone* or just the user that called it.  ("👁 this is only visible to you")
+If it's not visible, this bot can't see it.
+
 ## Option 1:
 
 Use the hosted bot, [**add here**](https://discord.com/oauth2/authorize?client_id=1366214068532285541&permissions=1374389544966&integration_type=0&scope=bot).
