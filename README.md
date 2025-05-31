@@ -1,4 +1,4 @@
-# AntiDcGenAI
+# AntiDiscordGenAI
 
 
 Discord recently added a feature to edit/"reimagine" images using generative AI tools, which cannot be disabled by server owners/admins.  
@@ -32,7 +32,7 @@ Fill in the bot token and just run it again.
 
 
 #### Directly (without a container):
-1. Download [the latest release](https://github.com/itsTyrion/AntiDiscordGenAI/releases/latest). If unsure, you probably want amd64 or arm64 for desktop/laptop/server and arm64/armv7/armv6 for e.g. a Raspberry Pi. (darwin = MacOS)
+1. Download [the latest GH action build](https://github.com/itsTyrion/AntiDiscordGenAI/actions). If unsure, you probably want amd64 or arm64 for desktop/laptop/server and arm64/armv7/armv6 for e.g. a Raspberry Pi. (darwin = MacOS)
 2. Just run it. On a server, use `screen` to keep it running after disconnecting
 
 #### With Podman:
@@ -70,6 +70,41 @@ Change config options to your liking or just configure via the command.
 If you come across more of those bots/apps, add their user ID to the list and the bot will handle them with a warn (+deletion if configured) as well, but no kick/ban. You're welcome to open an issue so I can properly handle them.
 
 ---
+
+## Updating
+
+To update the bot to the latest version:
+
+#### Directly (without a container):
+1. Stop the currently running bot process (e.g., by pressing `Ctrl+C` or using `screen -r`, then `Ctrl+C`).
+2. Download the [the latest build](https://github.com/itsTyrion/AntiDiscordGenAI/actions) again.
+3. Start the bot again as you did during the initial setup.
+
+#### With Podman:
+1. Stop and remove the running container:
+   ```bash
+   podman stop AntiDcGenAI
+   podman rm AntiDcGenAI
+   ```
+2. Update the source code. If you cloned the repository:
+   ```bash
+   git pull
+   ```
+   If you downloaded a zip, redownload and unzip the latest version, replacing the old files.
+3. Rebuild and rerun as you did initially ([Step 2 here](#with-podman))
+
+#### With Docker:
+1. Stop and remove the running container:
+   ```bash
+   docker stop AntiDcGenAI
+   docker rm AntiDcGenAI
+   ```
+2. Update the source code. If you cloned the repository:
+   ```bash
+   git pull
+   ```
+   If you downloaded a zip, redownload and unzip the latest version, replacing the old files.
+3. Rebuild and rerun as you did initially ([Step 2 here](#with-docker))
 
 ## Notes
 

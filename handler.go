@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func handleMsg(dg *discordgo.Session, m *discordgo.Message, logger *zap.SugaredLogger, c *Config, b bool) {
+func handleMsg(dg *discordgo.Session, m *discordgo.Message, logger *zap.SugaredLogger, c *Config) {
 	config := c.ForGuildID(m.GuildID)
 	interaction := m.Interaction
 

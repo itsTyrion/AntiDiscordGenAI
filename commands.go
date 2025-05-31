@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -10,14 +11,11 @@ import (
 	"go.uber.org/zap"
 )
 
-type CommandHandler struct {
-	Session *discordgo.Session
-	Config  *Config
-}
-
+var permissions int64 = discordgo.PermissionModerateMembers | discordgo.PermissionKickMembers
 var GuildSettingsCommand = discordgo.ApplicationCommand{
-	Name:        "settings",
-	Description: "Configure anti-discord settings for this guild.",
+	Name:                     "settings",
+	Description:              "Configure anti-discord settings for this guild.",
+	DefaultMemberPermissions: &permissions,
 	Options: []*discordgo.ApplicationCommandOption{
 		{
 			Name:        "view",
@@ -79,11 +77,21 @@ var GuildSettingsCommand = discordgo.ApplicationCommand{
 }
 
 func RegisterCommands(s *discordgo.Session, c *Config, logger *zap.SugaredLogger) {
-	handler := &CommandHandler{Session: s, Config: c}
 
-	if _, err := s.ApplicationCommandCreate(s.State.User.ID, "", &GuildSettingsCommand); err != nil {
-		logger.Errorf("Error creating command: %v\n", err)
+	commands := []*discordgo.ApplicationCommand{
+		&GuildSettingsCommand,
+		{Name: "about", Description: "About this bot"},
 	}
+
+	for _, command := range commands {
+		_, err := s.ApplicationCommandCreate(s.State.User.ID, "", command)
+		if err != nil {
+			logger.Errorf("Error creating command `%s`: %v\n", command.Name, err)
+		} else {
+			logger.Infof("Command `%s` registered successfully.", command.Name)
+		}
+	}
+
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if i.Type != discordgo.InteractionApplicationCommand {
 			return
@@ -104,23 +112,56 @@ func RegisterCommands(s *discordgo.Session, c *Config, logger *zap.SugaredLogger
 
 			switch options[0].Name {
 			case "view":
-				handler.handleViewSettings(s, i)
+				handleViewSettings(s, i, c)
 			case "set":
-				handler.handleSetSettings(s, i)
+				handleSetSettings(s, i, c)
 			case "bots":
-				handler.handleBotsCommand(s, i)
+				handleBotsCommand(s, i, c)
 			}
+		case "about":
+			embed := &discordgo.MessageEmbed{
+				Color: 0xFF324E,
+				Fields: []*discordgo.MessageEmbedField{
+					{
+						Name: "**Author**", Value: "itsTyrion (@tyri0n/<@!265038515375570944>)", Inline: false,
+					},
+					{
+						Name:   "**Ping**",
+						Value:  fmt.Sprintf("%dms", s.HeartbeatLatency().Milliseconds()),
+						Inline: false,
+					},
+					{
+						Name: "**Powered by**", Value: runtime.Version() + ", DiscordGo and Deez", Inline: false,
+					},
+					{
+						Name: "", Value: "Support human artists!", Inline: false,
+					},
+				},
+				Footer: &discordgo.MessageEmbedFooter{
+					Text: "Made (w/ love) in Germany",
+					// Purple heart emoji by Google Fonts (Noto Color Emoji)
+					IconURL: "https://raw.githubusercontent.com/googlefonts/noto-emoji/refs/heads/main/png/32/emoji_u1f49c.png",
+				},
+				Author: &discordgo.MessageEmbedAuthor{
+					Name:    fmt.Sprintf("AntiDiscordGenAI v%s", BOT_VERSION),
+					URL:     "https://youtu.be/qWNQUvIk954?t=44",
+					IconURL: s.State.User.AvatarURL(""),
+				},
+			}
+
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{Embeds: []*discordgo.MessageEmbed{embed}},
+			})
 		default:
 			logger.Errorf("Unknown command received: %s\n", data.Name)
 		}
 	})
-
-	logger.Info("Guild settings commands registered and handler added.")
-
 }
-func (h *CommandHandler) handleViewSettings(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
-	settings := h.Config.ForGuildID(i.GuildID)
+func handleViewSettings(s *discordgo.Session, i *discordgo.InteractionCreate, c *Config) {
+
+	settings := c.ForGuildID(i.GuildID)
 	response := fmt.Sprintf(
 		"**Current Settings:**\n"+
 			"Delete Messages: `%t`\n"+
@@ -135,7 +176,7 @@ func (h *CommandHandler) handleViewSettings(s *discordgo.Session, i *discordgo.I
 	respondEphemeral(s, i, response)
 }
 
-func (h *CommandHandler) handleSetSettings(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func handleSetSettings(s *discordgo.Session, i *discordgo.InteractionCreate, c *Config) {
 
 	opts := i.ApplicationCommandData().Options[0].Options
 	var setting string
@@ -151,7 +192,7 @@ func (h *CommandHandler) handleSetSettings(s *discordgo.Session, i *discordgo.In
 		}
 	}
 
-	settings := h.Config.ForGuildID(i.GuildID)
+	settings := c.ForGuildID(i.GuildID)
 	newSettings := settings.Copy()
 	parseBool := func(value string) (boolValue bool, err error) {
 		boolValue, err = strconv.ParseBool(value)
@@ -202,11 +243,11 @@ func (h *CommandHandler) handleSetSettings(s *discordgo.Session, i *discordgo.In
 		return
 	}
 
-	h.Config.UpdateGuildSettings(i.GuildID, newSettings)
+	c.UpdateGuildSettings(i.GuildID, newSettings)
 	respondEphemeral(s, i, response)
 }
 
-func (h *CommandHandler) handleBotsCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func handleBotsCommand(s *discordgo.Session, i *discordgo.InteractionCreate, c *Config) {
 
 	var action string
 	var botUser *discordgo.User
@@ -225,7 +266,7 @@ func (h *CommandHandler) handleBotsCommand(s *discordgo.Session, i *discordgo.In
 		return
 	}
 
-	settings := h.Config.ForGuildID(i.GuildID)
+	settings := c.ForGuildID(i.GuildID)
 	newSettings := settings.Copy()
 	response := ""
 
@@ -241,13 +282,13 @@ func (h *CommandHandler) handleBotsCommand(s *discordgo.Session, i *discordgo.In
 		}
 
 		newSettings.Bots = append(newSettings.Bots, botUser.ID)
-		h.Config.UpdateGuildSettings(i.GuildID, newSettings)
+		c.UpdateGuildSettings(i.GuildID, newSettings)
 		response = fmt.Sprintf("Added bot: <@%s>", botUser.ID)
 
 	case "remove":
 		if idx := slices.Index(newSettings.Bots, botUser.ID); idx != -1 {
 			newSettings.Bots = slices.Delete(newSettings.Bots, idx, idx+1)
-			h.Config.UpdateGuildSettings(i.GuildID, newSettings)
+			c.UpdateGuildSettings(i.GuildID, newSettings)
 			response = fmt.Sprintf("Removed bot: <@%s>", botUser.ID)
 		} else {
 			respondEphemeral(s, i, "Bot not found in blacklisted list")

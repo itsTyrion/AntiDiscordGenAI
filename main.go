@@ -28,7 +28,7 @@ func main() {
 		RegisterCommands(dg, config, logger)
 	})
 	dg.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {
-		handleMsg(dg, m.Message, logger, config, false)
+		handleMsg(dg, m.Message, logger, config)
 	})
 
 	if err = dg.Open(); err != nil {
